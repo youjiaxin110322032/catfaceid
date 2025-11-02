@@ -11,3 +11,7 @@ joblib
 
 sqlalchemy
 greenlet
+
+python-dotenv==1.0.1
+libsql-client==0.3.5
+aiohttp==3.10.5
