@@ -28,7 +28,14 @@ app.add_middleware(
 
 comments_db = {}  # {"mama": ["留言1"], "tama": ["留言2"]}
 
-knn, id2name = load_model()
+# 🚫 刪掉這行：knn, id2name = load_model()
+
+# ✅ 用 try/except 讓服務先起來（模型缺失時不會崩潰）
+try:
+    knn, id2name = load_model()
+except Exception as e:
+    knn, id2name = None, {}
+    print(f"[WARN] model not loaded at startup: {e}")
 
 @app.get("/health")
 def health():
@@ -46,6 +53,8 @@ def reload_model():
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
+    if knn is None:
+        raise HTTPException(status_code=503, detail="Model not loaded on server. Please try again later.")
     try:
         raw = await file.read()
         img = Image.open(io.BytesIO(raw)).convert("RGB")
